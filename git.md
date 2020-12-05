@@ -128,3 +128,59 @@ Git支持两种标签:轻量标签(lightweight)与附注标签(annotated)。轻�
 
 ### 别名
 觉得git命令太长不好输入时，可以通过git config来配置git命名的别名，如`git config --global alias.ci commit`，之后，可以输入`git ci`相当于`git commit`
+
+## 分支
+当使用`git commit`进行提交操作时，Git会先计算每一个子目录的校验和， 然后在Git仓库中这些校验和保存为树对象。随后，Git便会创建一个提交对象，它除了包含上面提到的那些信息外，还包含指向这个树对象(项目根目录)的指针。如此一来，Git就可以在需要的时候重现此次保存的快照。
+
+之后，Git仓库中存在着：N个blob对象(保存着文件快照)、一个tree对象(记录着目录结构和blob对象索引)以及一个commit对象(包含着指向前述树对象的指针和所有提交信息)。
+
+再次做出提交，产生的提交对象会包含一个指向上次提交对象(父对象)的指针。
+
+Git创建分支，只是创建了一个可以移动的新的指针。Git中有一个名为HEAD的特殊指针，指向当前所在的分支。
+
+### 本地分支
+- 创建分支：`git branch <branchName>`
+- 切换分支：`git checkout <branchName>`
+- 创建新分支的同时切换过去：`git checkout -b <newBranchName>`
+- 合并分支：先切换到最终要操作的分支，`git merge <branchName>`将指定的分支合并到当前分支。
+Git合并的结果是做了一个新的快照并且自动创建一个新的提交指向它。这是一次合并提交，它的特别之处在于他有不止一个父提交。
+当合并存在冲突时，需要手动解决冲突，可使用`git status`查看冲突，解决后使用`git add`及`git commit`再次提交。此外，还可以使用`git mergetool`启动可视化工具合并冲突。
+- 查看分支状态：`git branch`
+- 查看每一个分支的最后一次提交：`git branch -v`
+- 过滤已经合并或尚未合并到当前分支的分支：`git branch --merged/--no-merged`
+- 查看分支的分叉历史：`git log --oneline --decorate --graph --all`
+- 删除本地分支：`git branch -d <localBranchName>`当有代码未合并时会删除失败，若要强行删除可以使用`-D`来代替`-d`。
+
+### 远程分支
+从远程分支`git fetch`拉取代码，本地git仓库将会拉取代码，并将`remote/branch`的指针指向其位置：
+
+![git fetch](https://git-scm.com/book/en/v2/images/remote-branches-3.png)
+
+- 推送当前分支到远程分支：`git push <remote> <remoteBranchName>`
+- 推送本地其他分支到远程分支：`git push <remote> <localBranchName>:<remoteBranchName>`
+- 从远程分支拉取代码在本地创建分支：`git checkout -b <localBranchName> <remote>/<remoteBranchName>`当本地分支与远程分支名称保持一致时可以简化为`git checkout --track <remote>/<remoteBranchName>`，当远程仓库只有一个时，更进一步简化为：`git checkout <remoteBranchName>`
+- 设置已有的本地分支跟踪远程分支或修改跟踪的远程分支：`git branch -u(等同于--set-upstream-to) <remote>/<remoteBranchName>`
+- 合并远程分支到本地分支：`git merge <remote>/<remoteBranchName>`或`git merge @{u}`或`git merge @{upstream}`
+- 查看本地分支与远程分支之间的关系及差距：`git branch -vv`
+- 删除远程分支：`git push <remote> --delete <remoteBranchName>`
+
+### 变基
+变基rebase也是用来整合不同的分支，它可以将提交到某一分支上的所有修改都移至另一分支上。不同于merge之处在于，提交历史是一条直线没有分叉。
+
+将dev分支变基到master：
+```
+# 1. 切到dev分支
+git checkout dev
+# 2. 将dev变基到master
+git rebase master
+# 1-2. 以上两个命令可以不用切换dev分支，使用以下命令
+git rebase master dev
+# 3. 切到master
+git checkout master
+# 4. 将dev变基后合并到master
+git merge dev
+```
+
+变基的重要注意点：最好只在本地仓库中变基，不要在远程仓库中变基。
+
+如果A拉取了远程仓库，而B之后在远程仓库中执行了变基，那么A再次拉取代码并合并，变基前的操作就又会恢复。可以使用`git pull --rebase`来修复。此外，还可以使用`git config --global pull.rebase true`来更改`pull.rebase`的默认配置，使用`git pull`可以默认加上`--rebase`.
