@@ -1,4 +1,25 @@
-- name: Publish Gitbook
-  # You may pin to the exact commit or the version.
-  # uses: tuliren/publish-gitbook@f3830e3fc7bf059e0501c5ed535d97b2aa181e2e
-  uses: tuliren/publish-gitbook@v1.0.0
+# This is a basic workflow to help you get started with Actions
+
+name: Publish Gitbook to GitHubPages
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+    
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    name: Build Gitbook
+    runs-on: ubuntu-latest
+    steps:
+      # Check out the repo first
+      - name: Checkout code
+        uses: actions/checkout@v2
+      # Run this action to publish gitbook
+      - name: Publish
+        uses: tuliren/publish-gitbook@v1.0.0
+        with:
+          # specify either github_token or personal_token
+          github_token: ${{ secrets.GITHUB_TOKEN }}
