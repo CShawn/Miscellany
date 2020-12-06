@@ -184,3 +184,10 @@ git merge dev
 变基的重要注意点：最好只在本地仓库中变基，不要在远程仓库中变基。
 
 如果A拉取了远程仓库，而B之后在远程仓库中执行了变基，那么A再次拉取代码并合并，变基前的操作就又会恢复。可以使用`git pull --rebase`来修复。此外，还可以使用`git config --global pull.rebase true`来更改`pull.rebase`的默认配置，使用`git pull`可以默认加上`--rebase`.
+
+当rebase发生冲突时，需要手动解决冲突并使用`git rebase --continue`继续，或可以使用`git rebase --abort`取消rebase.
+
+## 远程仓库
+- 创建远程git仓库：创建`xxx.git`文件夹，并使用`git init --bare`初始化
+- 通过`git remote add <name> <localPath>`来添加本地仓库和远程仓库的关联，通过`--set-upstream`设置两者的关联，就可以与远程仓库交互了。
+- 生成ssh密钥：`ssh-keygen [-t rsa（不使用-t时默认就是rsa类型）] -C "email@email.com" -f <fileName>`
