@@ -191,3 +191,51 @@ git merge dev
 - 创建远程git仓库：创建`xxx.git`文件夹，并使用`git init --bare`初始化
 - 通过`git remote add <name> <localPath>`来添加本地仓库和远程仓库的关联，通过`--set-upstream`设置两者的关联，就可以与远程仓库交互了。
 - 生成ssh密钥：`ssh-keygen [-t rsa（不使用-t时默认就是rsa类型）] -C "email@email.com" -f <fileName>`
+
+### 其他
+- 比较当前分支与指定分支的不同：`git diff <branchName>`
+- 查看两个分支的公共父结点：`git merge-base <branch1> <branch2>`
+- 查看两个分支基于公共父结点的不同：`git diff <branch1>...<branch2>`
+- 拣选提交的代码：`git cherry-pick <commitHash>`
+- 生成构建号：`git describ <branch>`会生成一个字符串， 它由最近的标签名、自该标签之后的提交数 目和你所描述的提交的部分 SHA-1 值(前缀的 g 表示 Git)构成，如：v1.6.2-rc1-20-g8c5b85c
+- 发布tar.gz：`git archive master --prefix='project/' | gzip > `\`git describe master\``.tar.gz`生成如：v1.6.2-rc1-20-g8c5b85c.tar.gz
+- 发布zip：`git archive master --prefix='project/' --format=zip > `\` git describemaster\``.zip`
+
+## Git工具
+### 查看引用
+- 查看分支指向哪个特定的SHA-1：`git rev-parse <branch>`
+- 查看引用日志（记录了最近HEAD和分支引用所指向的历史）：`git reflog`
+- 查看某分支在某时指向了哪个提交：`git show <branch>@{<time>}`其中`<time>`可以为`yesterday`,`2.months.ago`等格式
+- 查看一个引用的上一个提交（祖先引用）：`git show <branch>^`在windows上需要使用两个`^^`或放入引号：`"<branch>^"`，
+还可以使用`git show <branch>~`，但`~`可以使用多个或后边增加数字，如`git show HEAD~~~`和`git show HEAD~3`可以查看当前提交的之前第3次提交。
+- 选出在一个分支中而不在另一个分支中的提交，比如在提交前可以查看在HEAD中而不在origin/master中的提交：
+```
+// 在branch2中而不在branch1中
+git log <branch1>..<branch2>
+git log ^<branch1> <branch2>
+git log <branch2> --not <branch1>
+
+// 在branch1和branch2中而不在branch3中
+git log <branch1> <branch2> --not <branch3>
+
+// 在两个分支之一中存在，但不是两者共有的提交
+git log <branch1>...<branch2>
+
+// 在两个分支之一中存在，但不是两者共有的提交，并显示每个提交到底处于哪一侧的分支
+git log --left-right <branch1>...<branch2>
+```
+
+### 暂存stash
+- 进入一个交互式终端模式：`git add -i/--interactive`
+- 想要切换分支，但是还不想要提交之前的工作;所以贮藏修改：`git stash`
+- 查看暂存的列表：`git stash list`
+- 将刚刚贮藏的工作重新应用: `git stash apply`
+- 将指定贮藏的工作重新应用：`git stash apply <stashName>如stash@{2}`
+- 删除最近的一次贮藏：`git stash pop`
+- 删除指定的贮藏：`git stash drop <stashName>`
+- 贮藏未跟踪的文件：`git stash -u/--include-untracked`
+- 贮藏包括已忽略的文件：`git stash -a/--all`
+- 从贮藏创建一个分支：`git stash branch <new branchname>`
+- 去除冗余文件或者清理工作目录：`git clean -f`移除工作目录中所有未追踪的文件
+- 查看将删除哪些文件：`git clean -n/--dry-run`
+- 清理文件夹：`git clean -d -f`
